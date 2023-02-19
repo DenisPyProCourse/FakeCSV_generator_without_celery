@@ -1,0 +1,40 @@
+{% extends 'base.html'%}
+
+{% load crispy_forms_filters %}
+
+{% block title %}List of schemas {% endblock %}
+
+    <br>
+{% block content %}
+    {% with list_object=object_list on_group=True %}
+        <table class="table table-striped">
+        <h3>Data schemas</h3>
+        <div style="position: absolute; margin: 10px; right: 10px; top: 80px; display:block;">
+
+            <a class="btn btn-success" href="{% url 'schemas:create' %}">New schema</a>
+
+        </div>
+    <thead>
+        <tr>
+            <th style="width: 5%">#</th>
+            <th style="width: 15%">Title</th>
+            <th style="width: 15%">Modified</th>
+            <th style="width: 15%">Actions</th>
+        </tr>
+    </thead>
+    {% for schema in list_object %}
+        <tr>
+            <td>{{ forloop.counter0|add:page_obj.start_index}}</td>
+            <td><a href="{% url 'schemas:detail' schema.pk %}"> {{ schema.title }} </a></td>
+            <td>{{ schema.updated|date:"Y-m-d" }}</td>
+            <td>
+                <a class="btn btn-outline-primary" href="{% url 'schemas:update' schema.pk %}">Edit</a> /
+                <a class="btn btn-outline-danger" href="{% url 'schemas:delete' schema.pk %}">Delete</a>
+            </td>
+        </tr>
+    {% endfor %}
+        </table>
+    {% endwith %}
+
+{% endblock %}
+

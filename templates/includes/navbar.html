@@ -1,0 +1,61 @@
+{% load static %}
+<nav class="navbar fixed-top navbar-expand-lg mb-3" style="background-color: #e3f2fd;">
+  <div class="container">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>#5F5F5F
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+         <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/">FakeCSV</a>
+        </li>
+
+       <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Schemas
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="{% url 'schemas:list' %}">List</a></li>
+              {% if user.is_authenticated %}
+            <li><a class="dropdown-item" href="{% url 'schemas:create' %}">Create</a></li>
+              {% endif %}
+          </ul>
+        </li>
+      </ul>
+        {% url 'schemas:list' as my_view %}
+        {% if request.path == my_view %}
+            {% include 'schema/search.html' %}&nbsp;&nbsp;&nbsp;
+        {% endif %}
+      <div class="d-flex">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="student-dropdown"
+                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if user.is_authenticated %}
+                                {{ user.username }}
+                            {% else %}
+                                Account
+                            {% endif %}
+
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="student-dropdown">
+                            {% if user.is_authenticated %}
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item"
+                                       href="{% url 'logout' %}">Logout</a></li>
+                            {% else %}
+                                <li><a class="dropdown-item"
+                                       href="{% url 'login' %}">Login</a></li>
+                                <li><a class="dropdown-item"
+                                       href="{% url 'registration' %}">Registration</a></li>
+                            {% endif %}
+                        </ul>
+
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>

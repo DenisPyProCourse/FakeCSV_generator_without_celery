@@ -1,0 +1,71 @@
+{% extends 'base.html'%}
+{% load static %}
+{% load crispy_forms_filters %}
+
+{% block title %} Schema details {% endblock %}
+
+{% block content %}
+    <table class="table table-striped">
+    <h3>Sample schema: {{ object.title }} </h3>
+    <thead>
+        <tr>
+            <th style="width: 5%">#</th>
+            <th style="width: 15%">Title</th>
+            <th style="width: 15%">Column type</th>
+        </tr>
+    </thead>
+    {% for col in column %}
+        <tr>
+            <td>{{ forloop.counter0|add:1}}</td>
+            <td>{{ col.column }} </td>
+             <td>{{ col.cl_type}} </td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <table class="table table-striped">
+    <h3>Datasets </h3>
+        <div style="max-width: 15em;
+  min-height: 2em;
+  margin-left: auto;
+  margin-right: 1.7em;">
+            <form method="post">
+                {% csrf_token %}
+                {{create_dataset|crispy}}
+
+                    <button class="btn btn-primary" id="schem" type="submit" data-type="{{ schema.id }}">Generate data</button>
+            </form>
+        </div>
+    <thead >
+        <tr>
+            <th style="width: 5%">#</th>
+            <th style="width: 15%">Created</th>
+            <th style="width: 15%">Status</th>
+            <th style="width: 15%">Actions</th>
+        </tr>
+    </thead>
+    {% for ds in datasets %}
+        <tr>
+            <td>{{ forloop.counter0|add:1}}</td>
+            <td>{{ ds.created|date:"Y-m-d" }} </td>
+            {% if ds.id == datasets.first.id %}
+             <td id="tasks"> </td>
+            {% else %}
+                {% if ds.status == 'Error' %}
+                <td style="color: red">{{ ds.status }}</td>
+                    {% else %}
+                    <td style="color: green">{{ ds.status }}</td>
+                    {% endif %}
+            {% endif %}
+        {% if ds.load_lnk %}
+            <td><a href="{{ ds.load_lnk }}">Download </a> </td>
+            {% else %}
+            <td><a style="color: darkorange" href="{% url 'schemas:detail' schema.id %}">Click me to retry! </a></td>
+        {% endif %}
+        </tr>
+    {% endfor %}
+    </table>
+{% endblock %}
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/status.js' %}"></script>
+{% endblock %}
