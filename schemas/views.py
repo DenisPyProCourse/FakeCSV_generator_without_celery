@@ -1,4 +1,5 @@
 import time
+
 from celery.result import AsyncResult
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,7 +15,7 @@ from django.views.generic import CreateView, ListView, UpdateView, DeleteView, D
 from schemas.forms import UserRegistrationForm, SchemaCreateForm, ColumnsFormSet, SchemaFilterForm, \
     DatasetCreateForm
 from schemas.models import Schema, Columns, DataSet
-from schemas.tasks import create_csv
+# from schemas.tasks import create_csv
 
 
 def index(request):
@@ -196,6 +197,32 @@ class DeleteSchemaView(LoginRequiredMixin, DeleteView):
     template_name = 'schema/delete.html'
 
 
+
+def create_csv(schem=None, rows=None):
+    """
+    Create a csv file
+    :param self: to get the celery.task.id
+    :param schem: get it from Ajax request
+    :param rows: get it from Ajax request
+    """
+    schema = Schema.objects.get(pk=int(schem))
+    csv_pk = DataSet.objects.all().first().id + 1
+    dataset = DataSet.objects.create(schema=schema, task_id=csv_pk, status='Processing', rows=rows)
+    dataset.save()
+    try:
+        result = schema.generate_data_set(rows=rows, url_id=csv_pk)
+        if result:
+            dataset.load_lnk = result
+            dataset.status = 'Ready'
+            dataset.save()
+        return True
+
+    except:
+        dataset.status = 'Error'
+        dataset.save()
+        raise
+
+
 @csrf_exempt
 def run_task(request):
     """
@@ -206,22 +233,22 @@ def run_task(request):
     if request.POST:
         task_type = int(request.POST.get("ds"))
         rows = int(request.POST.get("rows"))
-        task = create_csv.delay(schem=str(task_type), rows=rows)
-        return JsonResponse({"task_id": task.id}, status=202, safe=False)
+        create_csv(schem=str(task_type), rows=rows)
+        return JsonResponse({"task_id": 'rows'}, status=202, safe=False)
 
 
-@csrf_exempt
-def get_status(request, task_id):
-    """
-    Show a colored label of generation status for each dataset (processing/ready) on frontend.
-    :param task_id: get it from run_task view
-    :return: JsonResponse with celery task status id.
-    """
-    if request.method == 'GET':
-        task_result = AsyncResult(task_id)
-        result = {
-            "task_id": task_id,
-            "task_status": task_result.status,
-            "task_result": '' if task_result.result is None else str(task_result.result)
-        }
-        return JsonResponse(result, status=200, safe=False)
+# @csrf_exempt
+# def get_status(request, res):
+#     """
+#     Show a colored label of generation status for each dataset (processing/ready) on frontend.
+#     :param task_id: get it from run_task view
+#     :return: JsonResponse with celery task status id.
+#     """
+#     if request.method == 'GET':
+#         # task_result = AsyncResult(task_id)
+#         result = {
+#         #     # "task_id": task_id,
+#         #     # "task_status": task_result.status,
+#         #     # "task_result": '' if task_result.result is None else str(task_result.result)
+#         }
+#         return JsonResponse(result, status=200, safe=False)

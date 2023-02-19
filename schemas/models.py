@@ -90,7 +90,8 @@ class Schema(models.Model):
         try:
             os.mkdir(settings.MEDIA_ROOT)
         except OSError:
-            print("folder creating error")
+            # print("folder creating error")
+            pass
 
         with default_storage.open(str(settings.MEDIA_ROOT) + f"/{url_id}.csv", "w") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames, dialect='my')
